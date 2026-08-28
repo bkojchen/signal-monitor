@@ -1,0 +1,87 @@
+{
+  "generated": "2026-08-28T12:13:54.652529+00:00",
+  "overall": {
+    "level": "amber",
+    "headline": "WATCH",
+    "action": "Stop feeding NEW money into equities \u2014 redirect contributions to cash/gold/bonds. Trim the most concentrated sleeves (cap-weight US down; equal-weight & factor stay) by ~a third, tax-free. Keep the Lombard shelved.",
+    "drivers": [
+      "High-Yield credit spread (OAS)",
+      "Equity volatility (VIX)",
+      "AI-complex drawdown from high",
+      "H100 rental rate ($/GPU-hr)"
+    ],
+    "counts": {
+      "red": 0,
+      "amber": 6,
+      "green": 5
+    }
+  },
+  "signals": [
+    {
+      "key": "hy_spread",
+      "label": "High-Yield credit spread (OAS)",
+      "status": "amber",
+      "value": "3.31%"
+    },
+    {
+      "key": "ig_spread",
+      "label": "Investment-grade credit spread (OAS)",
+      "status": "green",
+      "value": "1.11%"
+    },
+    {
+      "key": "equity_vol",
+      "label": "Equity volatility (VIX)",
+      "status": "amber",
+      "value": "23.27"
+    },
+    {
+      "key": "yield_curve",
+      "label": "2s10s Treasury curve",
+      "status": "green",
+      "value": "0.36%"
+    },
+    {
+      "key": "ai_basket_drawdown",
+      "label": "AI-complex drawdown from high",
+      "status": "amber",
+      "value": "-13.00%"
+    },
+    {
+      "key": "gpu_rent_h100",
+      "label": "H100 rental rate ($/GPU-hr)",
+      "status": "amber",
+      "value": "2.35$/hr"
+    },
+    {
+      "key": "marginal_loan_quality",
+      "label": "Marginal GPU-loan quality",
+      "status": "amber",
+      "value": "crossover"
+    },
+    {
+      "key": "hyperscaler_capex",
+      "label": "Hyperscaler capex guidance",
+      "status": "green",
+      "value": "raising"
+    },
+    {
+      "key": "depreciation_disclosure",
+      "label": "Server-life / impairment disclosures",
+      "status": "amber",
+      "value": "shortening"
+    },
+    {
+      "key": "ai_lab_rounds",
+      "label": "AI-lab funding rounds",
+      "status": "green",
+      "value": "up round"
+    },
+    {
+      "key": "neocloud_events",
+      "label": "Neocloud covenant / default events",
+      "status": "green",
+      "value": "none"
+    }
+  ]
+}

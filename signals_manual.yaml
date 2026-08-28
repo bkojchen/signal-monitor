@@ -1,0 +1,33 @@
+# -----------------------------------------------------------------------------
+#  Manual signal inputs.  Update these when you do your review, then re-run.
+#  `value` is the current reading; `updated` is the date you checked (YYYY-MM-DD).
+#  Numeric signals: put the number. Categorical: use one of the words listed
+#  under `categorical:` for that signal in config.yaml.
+#  If `updated` is older than `stale_after_days`, the dashboard flags it grey.
+# -----------------------------------------------------------------------------
+
+stale_after_days: 45
+
+gpu_rent_h100:
+  value: 2.35
+  updated: 2026-08-20
+
+marginal_loan_quality:
+  value: crossover        # investment_grade | crossover | junk | stalled
+  updated: 2026-08-20
+
+hyperscaler_capex:
+  value: raising          # raising | holding | cutting
+  updated: 2026-08-20
+
+depreciation_disclosure:
+  value: shortening       # extending | stable | shortening | charge_taken
+  updated: 2026-08-20
+
+ai_lab_rounds:
+  value: up_round         # up_round | flat | delayed | down_round
+  updated: 2026-08-20
+
+neocloud_events:
+  value: none             # none | stress | covenant_breach | default
+  updated: 2026-08-20

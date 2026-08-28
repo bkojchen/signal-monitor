@@ -1,0 +1,134 @@
+# =============================================================================
+#  AI Credit-Cascade Early-Warning Monitor  --  configuration
+# =============================================================================
+#  Every signal resolves to one of: green / amber / red
+#  Rule types:
+#    absolute    -> status from the current level        (uses amber_above/red_above OR amber_below/red_below)
+#    roc         -> status from % change over `lookback` history points
+#    categorical -> status from a fixed value->status map (manual signals)
+#  If a signal defines both `absolute` and `roc`, the WORSE status wins.
+# =============================================================================
+
+fred_api_key: "PUT_YOUR_FREE_FRED_KEY_HERE"   # get one free at https://fred.stlouisfed.org/docs/api/api_key.html
+
+# ---- Automated signals: FRED (free API) ----
+signals:
+
+  hy_spread:
+    label: "High-Yield credit spread (OAS)"
+    category: leading
+    source: fred
+    series_id: BAMLH0A0HYM2
+    unit: "%"
+    direction: higher_is_worse
+    cascade: true                # part of the "red" cascade trigger set
+    roc: { lookback: 63, amber_change_pct: 15, red_change_pct: 30 }   # ~1 quarter of trading days
+    absolute: { amber_above: 4.5, red_above: 6.0 }
+    note: "The single best free system-stress line. Fast widening = the cascade tell."
+
+  ig_spread:
+    label: "Investment-grade credit spread (OAS)"
+    category: context
+    source: fred
+    series_id: BAMLC0A0CM
+    unit: "%"
+    direction: higher_is_worse
+    absolute: { amber_above: 1.3, red_above: 1.8 }
+    note: "Stress bleeding from junk into high-grade."
+
+  equity_vol:
+    label: "Equity volatility (VIX)"
+    category: leading
+    source: fred
+    series_id: VIXCLS
+    unit: ""
+    direction: higher_is_worse
+    absolute: { amber_above: 22, red_above: 32 }
+    note: "Bond-vol (MOVE) is proprietary; VIX is the free stand-in."
+
+  yield_curve:
+    label: "2s10s Treasury curve"
+    category: context
+    source: fred
+    series_id: T10Y2Y
+    unit: "%"
+    direction: lower_is_worse
+    absolute: { amber_below: 0.0, red_below: -0.5 }
+    note: "Regime context, slow-moving."
+
+  # ---- Automated: market prices (Yahoo via yfinance) ----
+  ai_basket_drawdown:
+    label: "AI-complex drawdown from high"
+    category: leading
+    source: market_drawdown
+    tickers: ["NVDA", "MSFT", "GOOGL", "AMZN", "META", "AVGO", "CRWV"]
+    unit: "%"
+    direction: lower_is_worse    # a deeper (more negative) drawdown is worse
+    absolute: { amber_below: -12, red_below: -25 }
+    note: "Equal-weight basket of the names at the centre of the thesis."
+
+# ---- Manual signals: no clean free API. Update signals_manual.yaml periodically. ----
+# (definitions here; live values in signals_manual.yaml)
+manual_signals:
+
+  gpu_rent_h100:
+    label: "H100 rental rate ($/GPU-hr)"
+    category: leading
+    unit: "$/hr"
+    direction: lower_is_worse
+    cascade: true
+    roc: { lookback: 1, amber_change_pct: -15, red_change_pct: -30 }  # vs your previous entry
+    source_hint: "GPU-cloud price trackers (e.g. vast.ai board, published H100 indices)."
+
+  marginal_loan_quality:
+    label: "Marginal GPU-loan quality"
+    category: leading
+    direction: categorical
+    cascade: true
+    categorical: { investment_grade: green, crossover: amber, junk: red, stalled: red }
+    source_hint: "Ratings/spreads on the newest neocloud DDTL or bond (CoreWeave, Nebius, Crusoe, Lambda)."
+
+  hyperscaler_capex:
+    label: "Hyperscaler capex guidance"
+    category: leading
+    direction: categorical
+    categorical: { raising: green, holding: amber, cutting: red }
+    source_hint: "Latest MSFT / GOOGL / AMZN / META earnings-call capex language."
+
+  depreciation_disclosure:
+    label: "Server-life / impairment disclosures"
+    category: leading
+    direction: categorical
+    categorical: { extending: green, stable: green, shortening: amber, charge_taken: red }
+    source_hint: "10-Q footnotes & earnings calls: is anyone SHORTENING useful life or taking a charge?"
+
+  ai_lab_rounds:
+    label: "AI-lab funding rounds"
+    category: leading
+    direction: categorical
+    categorical: { up_round: green, flat: amber, delayed: amber, down_round: red }
+    source_hint: "OpenAI / Anthropic / xAI latest raise: up, flat, delayed, or down."
+
+  neocloud_events:
+    label: "Neocloud covenant / default events"
+    category: leading
+    direction: categorical
+    cascade: true
+    categorical: { none: green, stress: amber, covenant_breach: red, default: red }
+    source_hint: "Filings/credit news: any coverage-covenant breach or forced GPU sale?"
+
+# ---- Overall status logic (your playbook) ----
+playbook:
+  green:
+    headline: "STABLE"
+    action: "Hold target 70/30. Keep dollar-cost-averaging the €120k/yr into equities. Rebalance quarterly. Dry powder stays dry. Lombard remains parked."
+  amber:
+    headline: "WATCH"
+    action: "Stop feeding NEW money into equities — redirect contributions to cash/gold/bonds. Trim the most concentrated sleeves (cap-weight US down; equal-weight & factor stay) by ~a third, tax-free. Keep the Lombard shelved."
+  red:
+    headline: "ACT"
+    action: "Move within days. Cut equity toward the ~35% floor; max cash / gold / short bonds. Your Beckham window means you can brake with ZERO CGT. Then wait, and redeploy dry powder in tranches on the way back."
+  # thresholds
+  amber_if_leading_alerts_at_least: 2      # 2+ leading signals amber-or-worse -> WATCH
+  red_if_reds_at_least: 2                   # any 2 red signals -> ACT
+  red_if_cascade_red_and_hy_amber: true    # a cascade signal red WHILE hy_spread amber+ -> ACT

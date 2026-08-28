@@ -1,0 +1,205 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Credit-Cascade Monitor</title>
+<meta http-equiv="refresh" content="1800">
+<style>
+  :root { --ink:#0f131b; --panel:#161c27; --line:#232c3a; --text:#dfe4ec;
+           --muted:#8a94a6; --c:#cf9f52; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ink); color:var(--text);
+    font-family: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; line-height:1.4; }
+  .wrap { max-width:1080px; margin:0 auto; padding:20px 18px 60px; }
+  .mono { font-family: ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+  .mockbar { background:#3a2f16; color:#e8c877; text-align:center; font-size:12px;
+    letter-spacing:.04em; padding:7px; border-radius:8px; margin-bottom:16px; }
+  header { display:flex; justify-content:space-between; align-items:baseline;
+    border-bottom:1px solid var(--line); padding-bottom:12px; margin-bottom:20px; }
+  header h1 { font-size:15px; font-weight:600; letter-spacing:.02em; margin:0; }
+  header .ts { color:var(--muted); font-size:12px; }
+  .live { display:inline-flex; align-items:center; gap:6px; color:#6f9e7b;
+    font-size:11px; letter-spacing:.1em; margin-right:12px; }
+  .live-dot { width:7px; height:7px; border-radius:50%; background:#6f9e7b;
+    animation:blink 1.8s infinite; }
+  .live-sub { color:var(--muted); letter-spacing:0; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.25;} }
+  @media (prefers-reduced-motion: reduce) { .live-dot { animation:none; } }
+
+  /* signature: the status banner */
+  .status { position:relative; background:var(--panel); border-radius:14px;
+    padding:26px 26px 24px 30px; overflow:hidden; border:1px solid var(--line); }
+  .status::before { content:""; position:absolute; left:0; top:0; bottom:0; width:6px;
+    background:var(--c); }
+  .status .head { display:flex; align-items:center; gap:16px; }
+  .status .beacon { width:18px; height:18px; border-radius:50%; background:var(--c);
+    box-shadow:0 0 0 0 var(--c); animation:pulse 2.6s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 55%,transparent);}
+    70%{box-shadow:0 0 0 14px transparent;} 100%{box-shadow:0 0 0 0 transparent;} }
+  @media (prefers-reduced-motion: reduce) { .status .beacon { animation:none; } }
+  .status .word { font-size:40px; font-weight:700; letter-spacing:.06em; color:var(--c); }
+  .status .counts { margin-left:auto; text-align:right; color:var(--muted); font-size:12px; }
+  .status .counts b { color:var(--text); }
+  .status .drivers { color:var(--muted); font-size:13px; margin:14px 0 16px; }
+  .status .drivers b { color:var(--text); font-weight:500; }
+  .status .action { font-size:14.5px; color:var(--text); background:#111722;
+    border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+
+  .section-label { color:var(--muted); font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; margin:30px 2px 12px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:15px 16px 14px; --c:#5c6675; }
+  .card-top { display:flex; justify-content:space-between; align-items:center; }
+  .eyebrow { color:var(--muted); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; }
+  .tag { color:var(--c); border:1px solid var(--c); border-radius:20px; padding:1px 7px;
+    font-size:9px; margin-left:5px; vertical-align:middle; }
+  .dot { width:10px; height:10px; border-radius:50%; background:var(--c); }
+  .card h3 { font-size:13.5px; font-weight:500; margin:9px 0 8px; color:var(--text); }
+  .stale { color:#5c6675; font-size:10px; border:1px solid #333c4b; border-radius:10px;
+    padding:0 6px; margin-left:4px; }
+  .value { font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:23px;
+    font-weight:600; color:var(--c); }
+  .delta { font-size:12px; color:var(--muted); margin-left:4px; }
+  .spark { margin:8px 0 6px; }
+  .trigger { color:var(--muted); font-size:11px; }
+  .foot { color:var(--muted); font-size:12px; margin-top:34px; border-top:1px solid var(--line);
+    padding-top:14px; }
+  .foot-warn { color:#cf9f52; }
+  a { color:#8fb3c9; }
+</style></head>
+<body><div class="wrap">
+  <div class="mockbar">SAMPLE DATA — run without --mock and add your FRED key for live readings</div>
+  <header>
+    <h1>AI Credit-Cascade Monitor</h1>
+    <span><span class="live"><span class="live-dot"></span>LIVE<span class="live-sub">· auto-refresh 30m</span></span><span class="ts mono">updated 2026-08-28 12:13</span></span>
+  </header>
+
+  <section class="status">
+    <div class="head">
+      <span class="beacon"></span>
+      <span class="word">WATCH</span>
+      <span class="counts"><b>0</b> red · <b>6</b> amber · <b>5</b> green</span>
+    </div>
+    <p class="drivers">Driven by: <b>High-Yield credit spread (OAS) · Equity volatility (VIX) · AI-complex drawdown from high · H100 rental rate ($/GPU-hr)</b></p>
+    <div class="action">Stop feeding NEW money into equities — redirect contributions to cash/gold/bonds. Trim the most concentrated sleeves (cap-weight US down; equal-weight & factor stay) by ~a third, tax-free. Keep the Lombard shelved.</div>
+  </section>
+
+  <p class="section-label">Signals — worst first</p>
+  <div class="grid">
+    <article class="card" style="--c:#cf9f52">
+      <div class="card-top">
+        <span class="eyebrow">leading <span class="tag">cascade</span></span>
+        <span class="dot"></span>
+      </div>
+      <h3>High-Yield credit spread (OAS)</h3>
+      <div class="value">3.31% <span class="delta">+17.6%</span></div>
+      <div class="spark"><svg width="132" height="34" viewBox="0 0 132 34"><polyline points="2.0,30.4 6.4,32.0 10.8,29.2 15.2,28.7 19.7,27.8 24.1,27.4 28.5,24.6 32.9,23.2 37.3,24.4 41.7,22.6 46.1,24.4 50.6,20.4 55.0,19.6 59.4,17.1 63.8,16.9 68.2,18.5 72.6,17.1 77.0,14.7 81.4,16.7 85.9,13.8 90.3,14.1 94.7,13.4 99.1,12.7 103.5,8.4 107.9,10.4 112.3,8.8 116.8,7.2 121.2,4.0 125.6,6.7 130.0,4.0" fill="none" stroke="#cf9f52" stroke-width="1.6" stroke-linejoin="round" opacity="0.9"/><circle cx="130.0" cy="4.0" r="2.4" fill="#cf9f52"/></svg></div>
+      <div class="trigger">amber ≥4.5%  ·  amber +15% / qtr</div>
+    </article>
+    <article class="card" style="--c:#cf9f52">
+      <div class="card-top">
+        <span class="eyebrow">leading</span>
+        <span class="dot"></span>
+      </div>
+      <h3>Equity volatility (VIX)</h3>
+      <div class="value">23.27 </div>
+      <div class="spark"><svg width="132" height="34" viewBox="0 0 132 34"><polyline points="2.0,30.0 6.4,29.9 10.8,32.0 15.2,28.3 19.7,31.4 24.1,30.8 28.5,29.9 32.9,27.7 37.3,29.5 41.7,25.9 46.1,26.9 50.6,25.3 55.0,23.8 59.4,24.8 63.8,20.8 68.2,20.3 72.6,19.4 77.0,13.5 81.4,15.0 85.9,11.8 90.3,8.9 94.7,8.5 99.1,8.5 103.5,6.6 107.9,5.7 112.3,4.0 116.8,7.3 121.2,5.0 125.6,6.8 130.0,7.1" fill="none" stroke="#cf9f52" stroke-width="1.6" stroke-linejoin="round" opacity="0.9"/><circle cx="130.0" cy="7.1" r="2.4" fill="#cf9f52"/></svg></div>
+      <div class="trigger">amber ≥22</div>
+    </article>
+    <article class="card" style="--c:#cf9f52">
+      <div class="card-top">
+        <span class="eyebrow">leading</span>
+        <span class="dot"></span>
+      </div>
+      <h3>AI-complex drawdown from high</h3>
+      <div class="value">-13.00% </div>
+      <div class="spark"><svg width="132" height="34" viewBox="0 0 132 34"><polyline points="2.0,4.0 13.6,6.5 25.3,9.1 36.9,6.5 48.5,14.2 60.2,19.3 71.8,16.7 83.5,21.8 95.1,26.9 106.7,24.4 118.4,29.5 130.0,32.0" fill="none" stroke="#cf9f52" stroke-width="1.6" stroke-linejoin="round" opacity="0.9"/><circle cx="130.0" cy="32.0" r="2.4" fill="#cf9f52"/></svg></div>
+      <div class="trigger">amber ≤-12%</div>
+    </article>
+    <article class="card" style="--c:#cf9f52">
+      <div class="card-top">
+        <span class="eyebrow">leading <span class="tag">cascade</span></span>
+        <span class="dot"></span>
+      </div>
+      <h3>H100 rental rate ($/GPU-hr)</h3>
+      <div class="value">2.35$/hr <span class="delta">-15.5%</span></div>
+      <div class="spark"><svg width="132" height="34" viewBox="0 0 132 34"><polyline points="2.0,4.0 44.7,6.5 87.3,10.1 130.0,32.0" fill="none" stroke="#cf9f52" stroke-width="1.6" stroke-linejoin="round" opacity="0.9"/><circle cx="130.0" cy="32.0" r="2.4" fill="#cf9f52"/></svg></div>
+      <div class="trigger">amber -15% / qtr</div>
+    </article>
+    <article class="card" style="--c:#cf9f52">
+      <div class="card-top">
+        <span class="eyebrow">leading <span class="tag">cascade</span></span>
+        <span class="dot"></span>
+      </div>
+      <h3>Marginal GPU-loan quality</h3>
+      <div class="value">crossover </div>
+      <div class="spark"><svg width="132" height="34"></svg></div>
+      <div class="trigger">red on: junk, stalled</div>
+    </article>
+    <article class="card" style="--c:#cf9f52">
+      <div class="card-top">
+        <span class="eyebrow">leading</span>
+        <span class="dot"></span>
+      </div>
+      <h3>Server-life / impairment disclosures</h3>
+      <div class="value">shortening </div>
+      <div class="spark"><svg width="132" height="34"></svg></div>
+      <div class="trigger">red on: charge taken</div>
+    </article>
+    <article class="card" style="--c:#6f9e7b">
+      <div class="card-top">
+        <span class="eyebrow">context</span>
+        <span class="dot"></span>
+      </div>
+      <h3>Investment-grade credit spread (OAS)</h3>
+      <div class="value">1.11% </div>
+      <div class="spark"><svg width="132" height="34" viewBox="0 0 132 34"><polyline points="2.0,26.2 6.4,31.5 10.8,32.0 15.2,22.3 19.7,25.2 24.1,28.1 28.5,23.3 32.9,27.2 37.3,21.9 41.7,16.6 46.1,16.6 50.6,17.0 55.0,20.4 59.4,18.5 63.8,19.4 68.2,12.7 72.6,14.1 77.0,10.8 81.4,14.1 85.9,14.6 90.3,7.9 94.7,5.4 99.1,5.4 103.5,5.0 107.9,4.0 112.3,4.0 116.8,7.9 121.2,4.0 125.6,5.0 130.0,6.9" fill="none" stroke="#6f9e7b" stroke-width="1.6" stroke-linejoin="round" opacity="0.9"/><circle cx="130.0" cy="6.9" r="2.4" fill="#6f9e7b"/></svg></div>
+      <div class="trigger">amber ≥1.3%</div>
+    </article>
+    <article class="card" style="--c:#6f9e7b">
+      <div class="card-top">
+        <span class="eyebrow">context</span>
+        <span class="dot"></span>
+      </div>
+      <h3>2s10s Treasury curve</h3>
+      <div class="value">0.36% </div>
+      <div class="spark"><svg width="132" height="34" viewBox="0 0 132 34"><polyline points="2.0,12.3 6.4,10.7 10.8,15.0 15.2,4.0 19.7,13.1 24.1,15.8 28.5,12.3 32.9,5.2 37.3,7.5 41.7,17.0 46.1,19.8 50.6,8.3 55.0,14.6 59.4,13.5 63.8,23.7 68.2,24.9 72.6,15.8 77.0,21.0 81.4,27.3 85.9,14.3 90.3,19.8 94.7,18.2 99.1,30.0 103.5,19.0 107.9,32.0 112.3,20.2 116.8,27.7 121.2,30.0 125.6,27.7 130.0,22.5" fill="none" stroke="#6f9e7b" stroke-width="1.6" stroke-linejoin="round" opacity="0.9"/><circle cx="130.0" cy="22.5" r="2.4" fill="#6f9e7b"/></svg></div>
+      <div class="trigger">amber ≤0.0%</div>
+    </article>
+    <article class="card" style="--c:#6f9e7b">
+      <div class="card-top">
+        <span class="eyebrow">leading</span>
+        <span class="dot"></span>
+      </div>
+      <h3>Hyperscaler capex guidance</h3>
+      <div class="value">raising </div>
+      <div class="spark"><svg width="132" height="34"></svg></div>
+      <div class="trigger">red on: cutting</div>
+    </article>
+    <article class="card" style="--c:#6f9e7b">
+      <div class="card-top">
+        <span class="eyebrow">leading</span>
+        <span class="dot"></span>
+      </div>
+      <h3>AI-lab funding rounds</h3>
+      <div class="value">up round </div>
+      <div class="spark"><svg width="132" height="34"></svg></div>
+      <div class="trigger">red on: down round</div>
+    </article>
+    <article class="card" style="--c:#6f9e7b">
+      <div class="card-top">
+        <span class="eyebrow">leading <span class="tag">cascade</span></span>
+        <span class="dot"></span>
+      </div>
+      <h3>Neocloud covenant / default events</h3>
+      <div class="value">none </div>
+      <div class="spark"><svg width="132" height="34"></svg></div>
+      <div class="trigger">red on: covenant breach, default</div>
+    </article></div>
+
+  <div class="foot">
+    <p>Automated: FRED (credit spreads, VIX, curve) + Yahoo (AI-basket drawdown).
+       Manual: GPU rents, loan quality, capex, disclosures, lab rounds, neocloud events.</p>
+    
+    <p>Not investment advice. Thresholds are starting points — calibrate them, and confirm any action with your adviser/gestor.</p>
+  </div>
+</div></body></html>
