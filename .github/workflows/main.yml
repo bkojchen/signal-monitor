@@ -1,25 +1,33 @@
 name: Update dashboard
 
-# Refreshes the live dashboard automatically.
 on:
   schedule:
-    - cron: "30 6 * * 1-5"        # 06:30 UTC, weekdays (markets/data are fresh by then)
-  workflow_dispatch:              # a "Run now" button in the Actions tab
+    - cron: "30 6 * * 1-5"     # 06:30 UTC weekdays — adjust to your Madrid time
+  workflow_dispatch:
   push:
-    paths:                        # editing your readings rebuilds immediately
+    paths:
       - "signals_manual.yaml"
       - "config.yaml"
 
 permissions:
-  contents: write                 # lets the job commit the refreshed page + history back
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -27,15 +35,14 @@ jobs:
 
       - name: Build dashboard from live data
         env:
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}   # set this in repo Settings → Secrets
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: |
           python src/main.py --output docs/index.html --refresh 1800
           touch docs/.nojekyll
 
-      - name: Commit refreshed page + history
-        run: |
-          git config user.name  "signal-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add docs data
-          git commit -m "refresh dashboard $(date -u +%FT%TZ)" || echo "nothing to commit"
-          git push
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - id: deploy
+        uses: actions/deploy-pages@v5
