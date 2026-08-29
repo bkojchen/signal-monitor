@@ -32,6 +32,11 @@ def _card(s: dict) -> str:
     cascade = ' <span class="tag">cascade</span>' if s.get("cascade") else ""
     change = (f'<span class="delta">{s["change_str"]}</span>'
               if s.get("change_str", "—") != "—" else "")
+    if s.get("auto"):
+        badge = f'<span class="src src-auto">● auto · {s.get("source","")}</span>'
+    else:
+        upd = f' · {s["updated"]}' if s.get("updated") else ""
+        badge = f'<span class="src src-manual">✎ manual{upd}</span>'
     return f"""
     <article class="card" style="--c:{col}">
       <div class="card-top">
@@ -41,7 +46,10 @@ def _card(s: dict) -> str:
       <h3>{s['label']}{stale}</h3>
       <div class="value">{s['value_str']} {change}</div>
       <div class="spark">{_spark(s.get('sparkline', []), s['status'])}</div>
-      <div class="trigger">{s['trigger']}</div>
+      <div class="card-foot">
+        <span class="trigger">{s['trigger']}</span>
+        {badge}
+      </div>
     </article>"""
 
 
@@ -131,7 +139,13 @@ def render(signals: List[dict], overall: dict, mock: bool = False,
     font-weight:600; color:var(--c); }}
   .delta {{ font-size:12px; color:var(--muted); margin-left:4px; }}
   .spark {{ margin:8px 0 6px; }}
+  .card-foot {{ display:flex; justify-content:space-between; align-items:center; gap:8px;
+    margin-top:2px; }}
   .trigger {{ color:var(--muted); font-size:11px; }}
+  .src {{ font-size:9.5px; letter-spacing:.03em; padding:2px 7px; border-radius:20px;
+    white-space:nowrap; }}
+  .src-auto {{ color:#7fa8c9; border:1px solid #2c3e50; background:#141b26; }}
+  .src-manual {{ color:#cf9f52; border:1px solid #443a24; background:#1c1810; }}
   .foot {{ color:var(--muted); font-size:12px; margin-top:34px; border-top:1px solid var(--line);
     padding-top:14px; }}
   .foot-warn {{ color:#cf9f52; }}
@@ -158,8 +172,8 @@ def render(signals: List[dict], overall: dict, mock: bool = False,
   <div class="grid">{cards}</div>
 
   <div class="foot">
-    <p>Automated: FRED (credit spreads, VIX, curve) + Yahoo (AI-basket drawdown).
-       Manual: GPU rents, loan quality, capex, disclosures, lab rounds, neocloud events.</p>
+    <p><span class="src src-auto">● auto</span> refreshes itself from a live feed (FRED / Yahoo).
+       <span class="src src-manual">✎ manual</span> is hand-entered in <code>signals_manual.yaml</code> — see SOURCES.md for where to check each.</p>
     {stale_note}
     <p>Not investment advice. Thresholds are starting points — calibrate them, and confirm any action with your adviser/gestor.</p>
   </div>

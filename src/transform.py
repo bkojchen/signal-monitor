@@ -58,6 +58,15 @@ def resolve_signal(sig: str, spec: dict, current, history: Dict[str, List[tuple]
            "status": "green", "value_str": "—", "change_str": "—", "trigger": "",
            "stale": False, "source_hint": spec.get("source_hint", "")}
 
+    # provenance: automated feed vs. hand-entered
+    _src = spec.get("source")
+    if _src == "fred":
+        out["auto"], out["source"] = True, "FRED"
+    elif _src == "market_drawdown":
+        out["auto"], out["source"] = True, "Yahoo"
+    else:
+        out["auto"], out["source"] = False, "Manual"
+
     # ---- categorical (manual) ----
     if spec.get("direction") == "categorical":
         val = current.get("value") if isinstance(current, dict) else current

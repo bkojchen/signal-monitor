@@ -23,6 +23,9 @@ def main():
                     help="skip network; use bundled sample history to preview the UI")
     ap.add_argument("--refresh", type=int, default=0,
                     help="auto-reload the page every N seconds (for hosted/live use)")
+    ap.add_argument("--email", action="store_true", help="email the dashboard after building")
+    ap.add_argument("--email-mode", choices=["always", "on-change"], default="always",
+                    help="'on-change' only emails when the overall level worsens")
     args = ap.parse_args()
 
     config = load_config(args.config)
@@ -66,6 +69,27 @@ def main():
     print(f"• status: {overall['headline']}  "
           f"({overall['counts']['red']}R/{overall['counts']['amber']}A/{overall['counts']['green']}G)")
     print(f"• dashboard → {args.output}")
+
+    if args.email:
+        import notify
+        cfg = notify.smtp_config()
+        if not cfg:
+            print("  ! --email set but SMTP env vars missing "
+                  "(SMTP_HOST, SMTP_USER, SMTP_PASS, EMAIL_TO) — skipping send")
+        else:
+            rank = {"green": 0, "amber": 1, "red": 2}
+            last_file = os.path.join(ROOT, "data", "last_level.txt")
+            last = ""
+            if os.path.exists(last_file):
+                last = open(last_file).read().strip()
+            worsened = rank.get(overall["level"], 0) > rank.get(last, -1)
+            if args.email_mode == "on-change" and not worsened:
+                print(f"  · on-change mode: level {overall['level']} not worse than "
+                      f"{last or 'none'} — no email")
+            else:
+                notify.send(overall, signals, args.output, cfg)
+            os.makedirs(os.path.dirname(last_file), exist_ok=True)
+            open(last_file, "w").write(overall["level"])
 
 
 if __name__ == "__main__":
