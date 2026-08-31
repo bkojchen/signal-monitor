@@ -64,6 +64,8 @@ def resolve_signal(sig: str, spec: dict, current, history: Dict[str, List[tuple]
         out["auto"], out["source"] = True, "FRED"
     elif _src == "market_drawdown":
         out["auto"], out["source"] = True, "Yahoo"
+    elif _src == "edgar":
+        out["auto"], out["source"] = True, "SEC EDGAR"
     else:
         out["auto"], out["source"] = False, "Manual"
 

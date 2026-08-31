@@ -123,5 +123,22 @@ def run_extract(config: dict, manual_path: str) -> Dict[str, object]:
         if spec.get("direction") != "categorical" and isinstance(val, (int, float)):
             numeric[sig] = float(val)
 
+    # ---- EDGAR-computed capex signals (one fetch covers several signals) ----
+    edgar_sigs = {s: spec for s, spec in config.get("signals", {}).items()
+                  if spec.get("source") == "edgar"}
+    if edgar_sigs:
+        try:
+            import edgar as _edgar
+            computed, note = _edgar.compute()
+            print(f"  edgar: {note}")
+            for sig, spec in edgar_sigs.items():
+                if sig in computed:
+                    v = computed[sig]
+                    current[sig] = v
+                    if spec.get("direction") != "categorical" and isinstance(v, (int, float)):
+                        numeric[sig] = float(v)
+        except Exception as e:
+            print(f"  ! edgar: {e}")
+
     append_history(numeric)
     return current

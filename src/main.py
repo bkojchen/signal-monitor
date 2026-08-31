@@ -40,6 +40,9 @@ def main():
             shutil.copy(sample, extract.HISTORY)
         current = extract.load_manual(args.manual)
         current = {**{k: v for k, v in current.items() if isinstance(v, dict)}}
+        # EDGAR signals aren't fetched in mock mode; supply sample values so the preview is complete
+        current.setdefault("hyperscaler_capex", "raising")
+        current.setdefault("hyperscaler_capex_accel", "decelerating")
         print("• mock mode: using sample history + manual file")
     else:
         if "PUT_YOUR_FREE_FRED_KEY" in config.get("fred_api_key", ""):
