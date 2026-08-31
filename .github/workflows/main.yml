@@ -37,6 +37,7 @@ jobs:
       - name: Build dashboard from live data
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}   # optional: your email; SEC asks for a contact
         run: |
           python src/main.py --output docs/index.html --refresh 1800
           touch docs/.nojekyll
@@ -52,6 +53,6 @@ jobs:
         run: |
           git config user.name  "signal-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/history.csv
+          git add data
           git commit -m "history $(date -u +%F)" || echo "no change to commit"
           git push || echo "push skipped"
