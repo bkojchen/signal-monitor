@@ -117,6 +117,72 @@ manual_signals:
     categorical: { none: green, stress: amber, covenant_breach: red, default: red }
     source_hint: "Filings/credit news: any coverage-covenant breach or forced GPU sale?"
 
+  # ===== Added from "The Second Derivative" — watch the ACCELERATION, not the level =====
+  hyperscaler_capex_accel:
+    label: "Hyperscaler capex — 2nd derivative"
+    category: leading
+    direction: categorical
+    cascade: true
+    stale_days: 100                # quarterly, moves on earnings
+    categorical: { accelerating: green, steady: green, decelerating: amber, contracting: red }
+    source_hint: "Is the GROWTH RATE of MSFT+GOOGL+AMZN+META capex itself still rising, flat, or slowing? (the acceleration, not the spend.) The article's central number — already negative on its estimates."
+
+  capex_cut_rewarded:
+    label: "Reflexive flip — is a capex cut rewarded?"
+    category: leading
+    direction: categorical
+    cascade: true
+    stale_days: 100
+    categorical: { none: green, cut_announced: amber, cut_rewarded: red }
+    source_hint: "Has a hyperscaler announced a capex CUT and seen its stock RISE on it? That inversion ends the arms race. Watch Meta/Zuckerberg first."
+
+  capex_to_ocf:
+    label: "Aggregate capex / operating cash flow"
+    category: leading
+    unit: "%"
+    direction: higher_is_worse
+    stale_days: 100
+    absolute: { amber_above: 80, red_above: 100 }
+    source_hint: "Sum of the four hyperscalers' capex ÷ operating cash flow. Above 100% the build is debt/equity-funded, not self-funded ('the fortress is being spent'). From earnings."
+
+  # ===== Added from "The Teaser Period" — the funding treadmill & the reset wall =====
+  openai_step_up:
+    label: "OpenAI round-over-round step-up"
+    category: leading
+    unit: "x"
+    direction: lower_is_worse
+    cascade: true
+    stale_days: 180                # only moves on a new raise
+    absolute: { amber_below: 1.5, red_below: 1.3 }
+    source_hint: "Each new OpenAI raise ÷ the prior valuation. The treadmill: prior steps ran 1.7–1.9×; the implied IPO step is ~1.23×. Nearing 1.0× = the refinance is failing."
+
+  openai_ipo_status:
+    label: "OpenAI terminal refinance (IPO)"
+    category: leading
+    direction: categorical
+    cascade: true
+    stale_days: 120
+    categorical: { on_track: green, delayed: amber, pulled: red, priced_below: red }
+    source_hint: "The refinance of last resort. On track, delayed, pulled, or pricing below the last private mark? The delay is itself the signal."
+
+  contract_renegotiation:
+    label: "Take-or-pay contract renegotiation"
+    category: leading
+    direction: categorical
+    cascade: true
+    stale_days: 90
+    categorical: { none: green, rumored: amber, confirmed: red }
+    source_hint: "The reset-wall trigger. Any compute take-or-pay deal deferred/renegotiated ('capacity rephasing', 'efficiency-linked pricing')? The first amendment re-rates the whole $2.3T backlog."
+
+  index_concentration:
+    label: "S&P 500 top-10 weight"
+    category: context
+    unit: "%"
+    direction: higher_is_worse
+    stale_days: 120
+    absolute: { amber_above: 38, red_above: 45 }
+    source_hint: "Top-10 (mostly AI) share of S&P 500 market cap — i.e. your own ETF's concentration. ~40% now vs ~27% at the dot-com peak. From S&P / index factsheets."
+
 # ---- Overall status logic (your playbook) ----
 playbook:
   green:
