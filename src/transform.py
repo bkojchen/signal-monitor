@@ -76,7 +76,7 @@ def resolve_signal(sig: str, spec: dict, current, history: Dict[str, List[tuple]
         out["trigger"] = "red on: " + ", ".join(k.replace("_", " ")
                                                  for k, s in mapping.items() if s == "red")
         upd = current.get("updated", "") if isinstance(current, dict) else ""
-        out.update(_staleness(upd, stale_after))
+        out.update(_staleness(upd, spec.get("stale_days", stale_after)))
         return out
 
     # ---- numeric ----
@@ -107,7 +107,7 @@ def resolve_signal(sig: str, spec: dict, current, history: Dict[str, List[tuple]
 
     upd = current.get("updated", "") if isinstance(current, dict) else ""
     if upd:
-        out.update(_staleness(upd, stale_after))
+        out.update(_staleness(upd, spec.get("stale_days", stale_after)))
     return out
 
 
