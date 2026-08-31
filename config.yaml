@@ -67,6 +67,33 @@ signals:
     absolute: { amber_below: -12, red_below: -25 }
     note: "Equal-weight basket of the names at the centre of the thesis."
 
+  # ---- Automated: computed from SEC EDGAR filings (see src/edgar.py) ----
+  hyperscaler_capex:
+    label: "Hyperscaler capex direction"
+    category: leading
+    source: edgar
+    direction: categorical
+    categorical: { raising: green, holding: amber, cutting: red }
+    note: "1st derivative: aggregate MSFT+GOOGL+AMZN+META quarterly capex, YoY. Computed from filings."
+
+  hyperscaler_capex_accel:
+    label: "Hyperscaler capex — 2nd derivative"
+    category: leading
+    source: edgar
+    direction: categorical
+    cascade: true
+    categorical: { accelerating: green, steady: green, decelerating: amber, contracting: red }
+    note: "The article's central number: is the capex GROWTH RATE itself rising or rolling over. Computed from filings."
+
+  capex_to_ocf:
+    label: "Aggregate capex / operating cash flow"
+    category: leading
+    source: edgar
+    unit: "%"
+    direction: higher_is_worse
+    absolute: { amber_above: 80, red_above: 100 }
+    note: "TTM hyperscaler capex / operating cash flow. Above 100% the build isn't self-funded. Computed from filings."
+
 # ---- Manual signals: no clean free API. Update signals_manual.yaml periodically. ----
 # (definitions here; live values in signals_manual.yaml)
 manual_signals:
@@ -87,13 +114,6 @@ manual_signals:
     cascade: true
     categorical: { investment_grade: green, crossover: amber, junk: red, stalled: red }
     source_hint: "Ratings/spreads on the newest neocloud DDTL or bond (CoreWeave, Nebius, Crusoe, Lambda)."
-
-  hyperscaler_capex:
-    label: "Hyperscaler capex guidance"
-    category: leading
-    direction: categorical
-    categorical: { raising: green, holding: amber, cutting: red }
-    source_hint: "Latest MSFT / GOOGL / AMZN / META earnings-call capex language."
 
   depreciation_disclosure:
     label: "Server-life / impairment disclosures"
@@ -118,15 +138,6 @@ manual_signals:
     source_hint: "Filings/credit news: any coverage-covenant breach or forced GPU sale?"
 
   # ===== Added from "The Second Derivative" — watch the ACCELERATION, not the level =====
-  hyperscaler_capex_accel:
-    label: "Hyperscaler capex — 2nd derivative"
-    category: leading
-    direction: categorical
-    cascade: true
-    stale_days: 100                # quarterly, moves on earnings
-    categorical: { accelerating: green, steady: green, decelerating: amber, contracting: red }
-    source_hint: "Is the GROWTH RATE of MSFT+GOOGL+AMZN+META capex itself still rising, flat, or slowing? (the acceleration, not the spend.) The article's central number — already negative on its estimates."
-
   capex_cut_rewarded:
     label: "Reflexive flip — is a capex cut rewarded?"
     category: leading
@@ -135,15 +146,6 @@ manual_signals:
     stale_days: 100
     categorical: { none: green, cut_announced: amber, cut_rewarded: red }
     source_hint: "Has a hyperscaler announced a capex CUT and seen its stock RISE on it? That inversion ends the arms race. Watch Meta/Zuckerberg first."
-
-  capex_to_ocf:
-    label: "Aggregate capex / operating cash flow"
-    category: leading
-    unit: "%"
-    direction: higher_is_worse
-    stale_days: 100
-    absolute: { amber_above: 80, red_above: 100 }
-    source_hint: "Sum of the four hyperscalers' capex ÷ operating cash flow. Above 100% the build is debt/equity-funded, not self-funded ('the fortress is being spent'). From earnings."
 
   # ===== Added from "The Teaser Period" — the funding treadmill & the reset wall =====
   openai_step_up:
