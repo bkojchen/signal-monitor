@@ -7,12 +7,19 @@ HISTORY = os.path.join(os.path.dirname(__file__), "..", "data", "history.csv")
 
 
 def _write_debug(note: str, computed: dict) -> None:
-    """Leave a breadcrumb in data/edgar_debug.txt (committed by the workflow)."""
+    """Leave a detailed breadcrumb in data/edgar_debug.txt (committed by the workflow)."""
     try:
+        import json
+        try:
+            import edgar as _e
+            detail = getattr(_e, "LAST_DEBUG", {})
+        except Exception:
+            detail = {}
         path = os.path.join(os.path.dirname(__file__), "..", "data", "edgar_debug.txt")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
-            f.write(f"{dt.datetime.now(dt.timezone.utc).isoformat()}\n{note}\n{computed}\n")
+            f.write(f"{dt.datetime.now(dt.timezone.utc).isoformat()}\n{note}\n"
+                    f"computed: {computed}\n\ndetail:\n{json.dumps(detail, indent=2, default=str)}\n")
     except Exception:
         pass
 

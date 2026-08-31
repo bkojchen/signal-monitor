@@ -21,6 +21,8 @@ CAPEX_CONCEPTS = ["PaymentsToAcquirePropertyPlantAndEquipment",   # MSFT, GOOGL,
 OCF_CONCEPTS = ["NetCashProvidedByUsedInOperatingActivities"]
 QFRAME = re.compile(r"^CY\d{4}Q[1-4]$")
 
+LAST_DEBUG: dict = {}   # populated by compute() for diagnostics
+
 
 def _user_agent() -> str:
     return os.environ.get("SEC_USER_AGENT", "signal-monitor contact@example.com")
@@ -92,12 +94,15 @@ def _growth_signals(cq: list, step: int) -> dict:
 
 
 def _collect(extract, fetcher):
-    capex, ocf, found = {}, {}, []
+    capex, ocf, found, counts = {}, {}, [], {}
     for name, cik in CIKS.items():
         c = _series(cik, CAPEX_CONCEPTS, fetcher, extract)
         o = _series(cik, OCF_CONCEPTS, fetcher, extract)
+        counts[name] = {"capex_pts": len(c), "ocf_pts": len(o)}
         if c and o:
-            capex[cik], ocf[cik], _ = c, o, found.append(name)
+            capex[cik], ocf[cik] = c, o
+            found.append(name)
+    LAST_DEBUG["per_company"] = counts
     return capex, ocf, found
 
 
@@ -110,22 +115,29 @@ def _aligned(capex, ocf):
 
 
 def compute(fetcher=_fetch_concept) -> tuple[dict, str]:
+    LAST_DEBUG.clear()
     # ---- try quarterly ----
     capex, ocf, found = _collect(_quarterly, fetcher)
+    LAST_DEBUG["quarterly_per_company"] = dict(LAST_DEBUG.get("per_company", {}))
     if len(found) >= 2:
         keys, cq, oq = _aligned(capex, ocf)
         if len(keys) >= 2:
             out, _ = _signals(cq, oq)
             out.update(_growth_signals(cq, step=4))
+            LAST_DEBUG.update({"mode": "quarterly", "keys": keys,
+                               "capex_series": cq, "ocf_series": oq, "out": out})
             return out, f"EDGAR quarterly: {len(found)}/4 ({','.join(found)}), {len(keys)} qtrs {keys[0]}->{keys[-1]}"
 
     # ---- fall back to annual 10-K ----
     capex, ocf, found = _collect(_annual, fetcher)
+    LAST_DEBUG["annual_per_company"] = dict(LAST_DEBUG.get("per_company", {}))
     if len(found) >= 2:
         keys, cq, oq = _aligned(capex, ocf)
+        LAST_DEBUG.update({"mode": "annual", "keys": keys, "capex_series": cq, "ocf_series": oq})
         if len(keys) >= 2:
-            out, _ = _signals(cq[-1:], oq[-1:])          # ratio from latest full year
+            out, _ = _signals(cq[-1:], oq[-1:])
             out.update(_growth_signals(cq, step=1))
+            LAST_DEBUG["out"] = out
             return out, f"EDGAR annual: {len(found)}/4 ({','.join(found)}), FY {keys[0]}->{keys[-1]}"
         return {}, f"EDGAR annual: {len(found)} companies but <2 common years"
 
