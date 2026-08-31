@@ -72,6 +72,11 @@ def resolve_signal(sig: str, spec: dict, current, history: Dict[str, List[tuple]
     # ---- categorical (manual) ----
     if spec.get("direction") == "categorical":
         val = current.get("value") if isinstance(current, dict) else current
+        if val in (None, "", "None", "none") and not spec.get("categorical", {}).get("none"):
+            out["status"] = "stale"
+            out["value_str"] = "no data"
+            out["trigger"] = "awaiting source"
+            return out
         mapping = spec.get("categorical", {})
         out["status"] = mapping.get(str(val), "amber")
         out["value_str"] = str(val).replace("_", " ")
