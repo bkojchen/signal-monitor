@@ -1,5 +1,9 @@
 # Where to get each manual signal
 
+> **Now automated — no entry needed:** `hyperscaler_capex`, `hyperscaler_capex_accel`, and
+> `capex_to_ocf` are computed directly from SEC EDGAR filings (`src/edgar.py`). Any manual
+> instructions for these below are obsolete — ignore them.
+
 Six signals have no clean free API, so you hand-enter them in `signals_manual.yaml`.
 None need to be daily — most move on earnings or news. Here's where to look and exactly
 what to type. The **trend matters more than the precise number**; you're watching for direction.
