@@ -115,31 +115,21 @@ def _aligned(capex, ocf):
 
 
 def compute(fetcher=_fetch_concept) -> tuple[dict, str]:
+    """Annual-only: SEC quarterly frames don't align into consecutive quarters for
+    these four filers, so we use clean full-year 10-K figures (step=1)."""
     LAST_DEBUG.clear()
-    # ---- try quarterly ----
-    capex, ocf, found = _collect(_quarterly, fetcher)
-    LAST_DEBUG["quarterly_per_company"] = dict(LAST_DEBUG.get("per_company", {}))
-    if len(found) >= 2:
-        keys, cq, oq = _aligned(capex, ocf)
-        if len(keys) >= 2:
-            out, _ = _signals(cq, oq)
-            out.update(_growth_signals(cq, step=4))
-            LAST_DEBUG.update({"mode": "quarterly", "keys": keys,
-                               "capex_series": cq, "ocf_series": oq, "out": out})
-            return out, f"EDGAR quarterly: {len(found)}/4 ({','.join(found)}), {len(keys)} qtrs {keys[0]}->{keys[-1]}"
-
-    # ---- fall back to annual 10-K ----
     capex, ocf, found = _collect(_annual, fetcher)
-    LAST_DEBUG["annual_per_company"] = dict(LAST_DEBUG.get("per_company", {}))
-    if len(found) >= 2:
-        keys, cq, oq = _aligned(capex, ocf)
-        keys, cq, oq = keys[-6:], cq[-6:], oq[-6:]      # most recent years only
-        LAST_DEBUG.update({"mode": "annual", "keys": keys, "capex_series": cq, "ocf_series": oq})
-        if len(keys) >= 2:
-            out, _ = _signals(cq[-1:], oq[-1:])
-            out.update(_growth_signals(cq, step=1))
-            LAST_DEBUG["out"] = out
-            return out, f"EDGAR annual: {len(found)}/4 ({','.join(found)}), FY {keys[0]}->{keys[-1]}"
-        return {}, f"EDGAR annual: {len(found)} companies but <2 common years"
+    if len(found) < 2:
+        return {}, f"EDGAR: only {len(found)} companies returned data ({','.join(found) or 'none'})"
 
-    return {}, f"EDGAR: no usable data (found {','.join(found) or 'none'})"
+    keys, cq, oq = _aligned(capex, ocf)
+    keys, cq, oq = keys[-6:], cq[-6:], oq[-6:]          # most recent common fiscal years
+    LAST_DEBUG.update({"mode": "annual", "found": found, "keys": keys,
+                       "capex_series": cq, "ocf_series": oq})
+    if len(keys) < 2:
+        return {}, f"EDGAR annual: {len(found)} companies but <2 common years ({keys})"
+
+    out, _ = _signals(cq[-1:], oq[-1:])                 # ratio from the latest full year
+    out.update(_growth_signals(cq, step=1))             # YoY and change-in-YoY
+    LAST_DEBUG["out"] = out
+    return out, f"EDGAR annual: {len(found)}/4 ({','.join(found)}), FY {keys[0]}->{keys[-1]}"
