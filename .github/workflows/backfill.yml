@@ -1,0 +1,21 @@
+name: Backfill history
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python3 src/backfill.py --days 300
+      - run: |
+          git config user.name "signal-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/history.csv
+          git commit -m "backfill history" || echo "no change"
+          git push
