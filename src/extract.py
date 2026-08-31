@@ -6,6 +6,17 @@ from typing import Dict, List
 HISTORY = os.path.join(os.path.dirname(__file__), "..", "data", "history.csv")
 
 
+def _write_debug(note: str, computed: dict) -> None:
+    """Leave a breadcrumb in data/edgar_debug.txt (committed by the workflow)."""
+    try:
+        path = os.path.join(os.path.dirname(__file__), "..", "data", "edgar_debug.txt")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            f.write(f"{dt.datetime.now(dt.timezone.utc).isoformat()}\n{note}\n{computed}\n")
+    except Exception:
+        pass
+
+
 def _today() -> str:
     return dt.date.today().isoformat()
 
@@ -130,7 +141,8 @@ def run_extract(config: dict, manual_path: str) -> Dict[str, object]:
         try:
             import edgar as _edgar
             computed, note = _edgar.compute()
-            print(f"  edgar: {note}")
+            print(f"  {note}")
+            _write_debug(note, computed)
             for sig, spec in edgar_sigs.items():
                 if sig in computed:
                     v = computed[sig]
@@ -139,6 +151,7 @@ def run_extract(config: dict, manual_path: str) -> Dict[str, object]:
                         numeric[sig] = float(v)
         except Exception as e:
             print(f"  ! edgar: {e}")
+            _write_debug(f"exception: {e}", {})
 
     append_history(numeric)
     return current

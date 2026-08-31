@@ -1,30 +1,25 @@
-"""Automate the three capex signals from SEC EDGAR (free, official XBRL API).
+"""Automate the capex signals from SEC EDGAR (free, official XBRL API).
 
-Pulls quarterly capital expenditure and operating cash flow for the four
-hyperscalers, aggregates over whichever companies return data, and computes:
+Strategy: try discrete quarterly data first (timely); if the four filers don't
+line up on enough common quarters -- Microsoft's June fiscal year often prevents
+it -- fall back to ANNUAL 10-K figures, which are unambiguous and always present.
+Either way it returns the three signals plus a `note` describing what it used,
+so the mode is always visible.
 
-  hyperscaler_capex        raising | holding | cutting        (1st derivative)
-  hyperscaler_capex_accel  accelerating|steady|decelerating|contracting (2nd derivative)
-  capex_to_ocf             trailing-twelve-month capex / OCF, %
+  hyperscaler_capex        raising | holding | cutting
+  hyperscaler_capex_accel  accelerating | steady | decelerating | contracting
+  capex_to_ocf             capex / operating cash flow, %
 
-Robustness: different filers tag capex differently (Amazon uses
-PaymentsToAcquireProductiveAssets), so each concept has fallbacks, any single
-company that fails is skipped rather than killing the run, and the returned
-note says exactly what was found -- check it in the workflow log.
-
-SEC asks automated callers to send a contact in the User-Agent. Set env
-SEC_USER_AGENT="you@example.com" for reliability (a generic default is used otherwise).
+Set env SEC_USER_AGENT="you@example.com" for reliable access.
 """
 from __future__ import annotations
-import os, re
+import os, re, time
 
 CIKS = {"MSFT": 789019, "GOOGL": 1652044, "AMZN": 1018724, "META": 1326801}
-CAPEX_CONCEPTS = [
-    "PaymentsToAcquirePropertyPlantAndEquipment",   # MSFT, GOOGL, META
-    "PaymentsToAcquireProductiveAssets",            # AMZN
-]
+CAPEX_CONCEPTS = ["PaymentsToAcquirePropertyPlantAndEquipment",   # MSFT, GOOGL, META
+                  "PaymentsToAcquireProductiveAssets"]            # AMZN
 OCF_CONCEPTS = ["NetCashProvidedByUsedInOperatingActivities"]
-QFRAME = re.compile(r"^CY\d{4}Q[1-4]$")             # SEC standardized 3-month calendar frames
+QFRAME = re.compile(r"^CY\d{4}Q[1-4]$")
 
 
 def _user_agent() -> str:
@@ -32,94 +27,106 @@ def _user_agent() -> str:
 
 
 def _fetch_concept(cik: int, concept: str) -> dict | None:
-    """Return the companyconcept JSON, or None on any failure (404, 403, network)."""
     import requests
     url = f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik:010d}/us-gaap/{concept}.json"
     try:
         r = requests.get(url, headers={"User-Agent": _user_agent()}, timeout=30)
+        time.sleep(0.15)                    # stay well under SEC's 10 req/s
         return r.json() if r.status_code == 200 else None
     except Exception:
         return None
 
 
-def quarterly_from_concept(js: dict | None) -> dict:
-    """{ 'CY2025Q3': value } using only SEC standardized discrete-quarter frames."""
+def _quarterly(js: dict | None) -> dict:
     out = {}
-    if not js:
-        return out
-    for f in js.get("units", {}).get("USD", []):
-        fr = f.get("frame", "")
-        if QFRAME.match(fr):
-            out[fr] = f["val"]
+    if js:
+        for f in js.get("units", {}).get("USD", []):
+            if QFRAME.match(f.get("frame", "")):
+                out[f["frame"]] = f["val"]
     return out
 
 
-def _series(cik: int, concepts: list, fetcher) -> dict:
-    """First non-empty quarterly series across candidate concept tags."""
+def _annual(js: dict | None) -> dict:
+    """{ '2025': full_year_value } from 10-K facts."""
+    out = {}
+    if js:
+        for f in js.get("units", {}).get("USD", []):
+            if f.get("fp") == "FY" and f.get("form") == "10-K" and f.get("end"):
+                out[f["end"][:4]] = f["val"]
+    return out
+
+
+def _series(cik: int, concepts: list, fetcher, extract) -> dict:
     for c in concepts:
-        q = quarterly_from_concept(fetcher(cik, c))
-        if q:
-            return q
+        s = extract(fetcher(cik, c))
+        if s:
+            return s
     return {}
 
 
-def compute(fetcher=_fetch_concept) -> tuple[dict, str]:
-    """Return ({signal: value}, note). fetcher(cik, concept) is injectable for testing."""
-    capex: dict = {}
-    ocf: dict = {}
-    found = []
-    for name, cik in CIKS.items():
-        cser = _series(cik, CAPEX_CONCEPTS, fetcher)
-        oser = _series(cik, OCF_CONCEPTS, fetcher)
-        if cser and oser:
-            capex[cik], ocf[cik] = cser, oser
-            found.append(name)
-
-    if len(found) < 2:
-        return {}, f"EDGAR: only {len(found)} companies returned data ({','.join(found) or 'none'})"
-
-    cap_common = set.intersection(*[set(v) for v in capex.values()])
-    ocf_common = set.intersection(*[set(v) for v in ocf.values()])
-    quarters = sorted(cap_common & ocf_common)
-    if len(quarters) < 2:
-        return {}, f"EDGAR: {len(found)} companies but <2 common quarters"
-
-    cq = [sum(capex[c][q] for c in capex) for q in quarters]
-    oq = [sum(ocf[c][q] for c in ocf) for q in quarters]
-
-    ttm_capex, ttm_ocf = sum(cq[-4:]), sum(oq[-4:])
-    ratio = round(ttm_capex / ttm_ocf * 100, 1) if ttm_ocf else None
-
-    def yoy(i: int):
-        return (cq[i] / cq[i - 4] - 1) * 100 if i >= 4 and cq[i - 4] else None
-
-    g_now, g_prev = yoy(len(cq) - 1), yoy(len(cq) - 2)
-    if g_now is None:
-        g_now = (cq[-1] / cq[-2] - 1) * 100 if cq[-2] else None
-
-    direction = None
-    if g_now is not None:
-        direction = "cutting" if g_now < 0 else "holding" if g_now < 10 else "raising"
-
-    accel = None
-    if g_now is not None and g_prev is not None:
-        delta = g_now - g_prev
-        if g_now < 0:
-            accel = "contracting"
-        elif delta > 2:
-            accel = "accelerating"
-        elif delta < -2:
-            accel = "decelerating"
-        else:
-            accel = "steady"
-
+def _signals(cq: list, oq: list) -> dict:
+    ttm_c, ttm_o = sum(cq[-4:]), sum(oq[-4:])          # quarterly: TTM; annual: last yr dominates
+    ratio = round(ttm_c / ttm_o * 100, 1) if ttm_o else None
     out = {}
     if ratio is not None:
         out["capex_to_ocf"] = ratio
-    if direction:
-        out["hyperscaler_capex"] = direction
-    if accel:
-        out["hyperscaler_capex_accel"] = accel
-    note = (f"EDGAR: {len(found)}/4 companies ({','.join(found)}), "
-            f"{len(quarters)} quarters {quarters[0]}->{quarters[-1]}")
-    return out, note
+    return out, ratio
+
+
+def _growth_signals(cq: list, step: int) -> dict:
+    """direction + acceleration from a capex list; step=4 for quarters (YoY), 1 for years."""
+    def g(i):
+        return (cq[i] / cq[i - step] - 1) * 100 if i >= step and cq[i - step] else None
+    g_now, g_prev = g(len(cq) - 1), g(len(cq) - 2)
+    if g_now is None and len(cq) >= 2 and cq[-2]:
+        g_now = (cq[-1] / cq[-2] - 1) * 100
+    out = {}
+    if g_now is not None:
+        out["hyperscaler_capex"] = "cutting" if g_now < 0 else "holding" if g_now < 10 else "raising"
+    if g_now is not None and g_prev is not None:
+        d = g_now - g_prev
+        out["hyperscaler_capex_accel"] = ("contracting" if g_now < 0 else
+                                          "accelerating" if d > 2 else
+                                          "decelerating" if d < -2 else "steady")
+    return out
+
+
+def _collect(extract, fetcher):
+    capex, ocf, found = {}, {}, []
+    for name, cik in CIKS.items():
+        c = _series(cik, CAPEX_CONCEPTS, fetcher, extract)
+        o = _series(cik, OCF_CONCEPTS, fetcher, extract)
+        if c and o:
+            capex[cik], ocf[cik], _ = c, o, found.append(name)
+    return capex, ocf, found
+
+
+def _aligned(capex, ocf):
+    keys = sorted(set.intersection(*[set(capex[c]) for c in capex]) &
+                  set.intersection(*[set(ocf[c]) for c in ocf]))
+    cq = [sum(capex[c][k] for c in capex) for k in keys]
+    oq = [sum(ocf[c][k] for c in ocf) for k in keys]
+    return keys, cq, oq
+
+
+def compute(fetcher=_fetch_concept) -> tuple[dict, str]:
+    # ---- try quarterly ----
+    capex, ocf, found = _collect(_quarterly, fetcher)
+    if len(found) >= 2:
+        keys, cq, oq = _aligned(capex, ocf)
+        if len(keys) >= 2:
+            out, _ = _signals(cq, oq)
+            out.update(_growth_signals(cq, step=4))
+            return out, f"EDGAR quarterly: {len(found)}/4 ({','.join(found)}), {len(keys)} qtrs {keys[0]}->{keys[-1]}"
+
+    # ---- fall back to annual 10-K ----
+    capex, ocf, found = _collect(_annual, fetcher)
+    if len(found) >= 2:
+        keys, cq, oq = _aligned(capex, ocf)
+        if len(keys) >= 2:
+            out, _ = _signals(cq[-1:], oq[-1:])          # ratio from latest full year
+            out.update(_growth_signals(cq, step=1))
+            return out, f"EDGAR annual: {len(found)}/4 ({','.join(found)}), FY {keys[0]}->{keys[-1]}"
+        return {}, f"EDGAR annual: {len(found)} companies but <2 common years"
+
+    return {}, f"EDGAR: no usable data (found {','.join(found) or 'none'})"
