@@ -46,3 +46,45 @@ what to type. The **trend matters more than the precise number**; you're watchin
 
 You don't have to touch all six every time — update what changed, leave the rest. The `updated`
 date on each card (and the stale flag) tells you at a glance what's getting old.
+
+---
+
+# New signals — from *The Second Derivative* & *The Teaser Period*
+
+These track the *mechanism* the earlier board only saw the symptoms of. Most move on quarterly
+earnings or on a specific event, so they carry longer stale windows (they won't nag between updates).
+
+## Watch the acceleration, not the level (*Second Derivative*)
+
+### `hyperscaler_capex_accel` — is capex *growth* still speeding up? *(cascade)*
+The article's central number. Not "are they spending more" (that's the old `hyperscaler_capex`), but "is the growth *rate* itself rising or slowing." Their estimate: already negative.
+**Where:** the four hyperscalers' capex guidance across the last few quarters — compute the change in the growth rate. **Enter:** `accelerating` · `steady` · `decelerating` · `contracting`.
+
+### `capex_cut_rewarded` — has a cut been *rewarded*? *(cascade)*
+The regime-flip trigger: the first hyperscaler to announce a capex **cut** and see its stock **rise**. That inversion ends the arms race. **Watch Meta/Zuckerberg first.**
+**Enter:** `none` · `cut_announced` · `cut_rewarded`.
+
+### `capex_to_ocf` — capex as % of operating cash flow
+Above 100%, the build is no longer self-funded — it runs on debt/equity ("the fortress is being spent"). **Where:** sum the four hyperscalers' capex ÷ operating cash flow from earnings. **Enter:** the number (e.g. `85`).
+
+## The funding treadmill & the reset wall (*Teaser Period*)
+
+### `openai_step_up` — round-over-round valuation multiple *(cascade)*
+The treadmill that keeps the naked borrower solvent. Prior steps ran 1.7–1.9×; the implied IPO step is ~1.23×. Toward 1.0× = the refinance is failing. **Where:** each new raise ÷ prior valuation. **Enter:** the multiple (e.g. `1.23`).
+
+### `openai_ipo_status` — the refinance of last resort *(cascade)*
+**Enter:** `on_track` · `delayed` · `pulled` · `priced_below`. (The delay itself is the signal.)
+
+### `contract_renegotiation` — the reset-wall trigger *(cascade)*
+Any take-or-pay compute deal deferred or renegotiated — "capacity rephasing," "efficiency-linked pricing." The **first** amendment re-rates the entire $2.3T backlog from "contracted" to "negotiable." **Enter:** `none` · `rumored` · `confirmed`.
+
+### `index_concentration` — your own portfolio's exposure
+Top-10 (mostly AI) share of the S&P 500: ~40% now vs ~27% at the dot-com peak. This is literally how concentrated your World/S&P ETFs are. **Where:** S&P / index factsheets. **Enter:** the % (e.g. `40`).
+
+## Cadence
+
+- **Around earnings (Jan/Apr/Jul/Oct):** capex 2nd-derivative, capex/OCF, cut-rewarded.
+- **On a headline:** step-up (new raise), IPO status, contract renegotiation.
+- **Occasionally:** index concentration (drifts slowly).
+
+Most of the year these read `none` / `on_track` / green — you're waiting for the one that flips.
