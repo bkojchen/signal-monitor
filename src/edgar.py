@@ -59,11 +59,11 @@ def _annual(js: dict | None) -> dict:
 
 
 def _series(cik: int, concepts: list, fetcher, extract) -> dict:
+    """Merge across candidate tags (companies switch tags over time, e.g. Amazon)."""
+    merged = {}
     for c in concepts:
-        s = extract(fetcher(cik, c))
-        if s:
-            return s
-    return {}
+        merged.update(extract(fetcher(cik, c)))
+    return merged
 
 
 def _signals(cq: list, oq: list) -> dict:
@@ -133,6 +133,7 @@ def compute(fetcher=_fetch_concept) -> tuple[dict, str]:
     LAST_DEBUG["annual_per_company"] = dict(LAST_DEBUG.get("per_company", {}))
     if len(found) >= 2:
         keys, cq, oq = _aligned(capex, ocf)
+        keys, cq, oq = keys[-6:], cq[-6:], oq[-6:]      # most recent years only
         LAST_DEBUG.update({"mode": "annual", "keys": keys, "capex_series": cq, "ocf_series": oq})
         if len(keys) >= 2:
             out, _ = _signals(cq[-1:], oq[-1:])
