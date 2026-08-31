@@ -31,3 +31,32 @@ ai_lab_rounds:
 neocloud_events:
   value: none             # none | stress | covenant_breach | default
   updated: 2026-08-20
+
+# ---- added from The Second Derivative + The Teaser Period ----
+hyperscaler_capex_accel:
+  value: decelerating     # accelerating | steady | decelerating | contracting
+  updated: 2026-08-28
+
+capex_cut_rewarded:
+  value: none             # none | cut_announced | cut_rewarded
+  updated: 2026-08-28
+
+capex_to_ocf:
+  value: 85               # % of operating cash flow
+  updated: 2026-08-28
+
+openai_step_up:
+  value: 1.23             # latest raise ÷ prior valuation
+  updated: 2026-08-28
+
+openai_ipo_status:
+  value: delayed          # on_track | delayed | pulled | priced_below
+  updated: 2026-08-28
+
+contract_renegotiation:
+  value: none             # none | rumored | confirmed
+  updated: 2026-08-28
+
+index_concentration:
+  value: 40               # top-10 % of S&P 500
+  updated: 2026-08-28
