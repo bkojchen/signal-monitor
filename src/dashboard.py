@@ -58,6 +58,7 @@ def render(signals: List[dict], overall: dict, mock: bool = False,
     lvl = overall["level"]
     col = C.get(lvl, "#5c6675")
     now = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
+    build_epoch = dt.datetime.now(dt.timezone.utc).timestamp()
     refresh_meta = (f'<meta http-equiv="refresh" content="{refresh_seconds}">'
                     if refresh_seconds > 0 else "")
     if refresh_seconds > 0:
@@ -100,6 +101,10 @@ def render(signals: List[dict], overall: dict, mock: bool = False,
   .live-dot {{ width:7px; height:7px; border-radius:50%; background:#6f9e7b;
     animation:blink 1.8s infinite; }}
   .live-sub {{ color:var(--muted); letter-spacing:0; }}
+  .age-fresh {{ color:#6f9e7b; }}
+  .age-stale {{ color:#c85a44; font-weight:600; }}
+  .stale-warn {{ display:none; background:#241310; color:#e0a08f; border:1px solid #5a2f24;
+    border-radius:8px; padding:9px 13px; font-size:12.5px; margin-bottom:14px; }}
   @keyframes blink {{ 0%,100%{{opacity:1;}} 50%{{opacity:.25;}} }}
   @media (prefers-reduced-motion: reduce) {{ .live-dot {{ animation:none; }} }}
 
@@ -153,9 +158,10 @@ def render(signals: List[dict], overall: dict, mock: bool = False,
 </style></head>
 <body><div class="wrap">
   {mock_banner}
+  <div id="staleWarn" class="stale-warn">⚠ This page is over a day old — the scheduled build likely didn't run. Open <b>Actions → Run workflow</b> to refresh.</div>
   <header>
     <h1>AI Credit-Cascade Monitor</h1>
-    <span>{live_pill}<span class="ts mono">updated {now}</span></span>
+    <span>{live_pill}<span class="ts mono" id="built" data-epoch="{build_epoch:.0f}">updated {now}</span></span>
   </header>
 
   <section class="status">
@@ -177,4 +183,21 @@ def render(signals: List[dict], overall: dict, mock: bool = False,
     {stale_note}
     <p>Not investment advice. Thresholds are starting points — calibrate them, and confirm any action with your adviser/gestor.</p>
   </div>
-</div></body></html>"""
+</div>
+<script>
+(function(){{
+  var el=document.getElementById('built');
+  if(!el){{return;}}
+  var epoch=parseFloat(el.getAttribute('data-epoch'))*1000;
+  if(!epoch){{return;}}
+  var built=new Date(epoch), ageH=(Date.now()-epoch)/3600000, rel;
+  if(ageH<1){{rel=Math.max(1,Math.round(ageH*60))+' min ago';}}
+  else if(ageH<24){{rel=Math.round(ageH)+'h ago';}}
+  else {{rel=Math.round(ageH/24)+'d ago';}}
+  var loc=built.toLocaleString([], {{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}});
+  el.textContent='updated '+loc+' · '+rel;
+  el.classList.add(ageH>=24?'age-stale':'age-fresh');
+  if(ageH>=24){{var w=document.getElementById('staleWarn'); if(w){{w.style.display='block';}}}}
+}})();
+</script>
+</body></html>"""
