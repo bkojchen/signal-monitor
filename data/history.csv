@@ -204,7 +204,7 @@ date,signal,value
 2026-08-26,ai_basket_drawdown,-10.02
 2026-08-27,ai_basket_drawdown,-8.54
 2026-08-28,ai_basket_drawdown,-8.44
-2026-08-31,ai_basket_drawdown,-13.45
+2026-08-31,ai_basket_drawdown,-13.29
 2026-08-31,capex_to_ocf,85.0
 2025-11-04,equity_vol,19.0
 2025-11-05,equity_vol,18.01
@@ -635,7 +635,7 @@ date,signal,value
 2026-08-25,hy_spread,2.7
 2026-08-26,hy_spread,2.67
 2026-08-27,hy_spread,2.63
-2026-08-31,hy_spread,2.63
+2026-08-31,hy_spread,2.6
 2025-11-04,ig_spread,0.83
 2025-11-05,ig_spread,0.81
 2025-11-06,ig_spread,0.82
