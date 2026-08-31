@@ -16,9 +16,6 @@ marginal_loan_quality:
   value: crossover        # investment_grade | crossover | junk | stalled
   updated: 2026-08-20
 
-hyperscaler_capex:
-  value: raising          # raising | holding | cutting
-  updated: 2026-08-20
 
 depreciation_disclosure:
   value: shortening       # extending | stable | shortening | charge_taken
@@ -33,17 +30,11 @@ neocloud_events:
   updated: 2026-08-20
 
 # ---- added from The Second Derivative + The Teaser Period ----
-hyperscaler_capex_accel:
-  value: decelerating     # accelerating | steady | decelerating | contracting
-  updated: 2026-08-28
 
 capex_cut_rewarded:
   value: none             # none | cut_announced | cut_rewarded
   updated: 2026-08-28
 
-capex_to_ocf:
-  value: 85               # % of operating cash flow
-  updated: 2026-08-28
 
 openai_step_up:
   value: 1.23             # latest raise ÷ prior valuation
