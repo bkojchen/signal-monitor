@@ -1,25 +1,25 @@
-2026-08-31T15:42:33.153083+00:00
-EDGAR annual: 4/4 (MSFT,GOOGL,AMZN,META), FY 2013->2016
-computed: {'capex_to_ocf': 29.0, 'hyperscaler_capex': 'raising'}
+2026-08-31T15:48:21.816050+00:00
+EDGAR quarterly: 4/4 (MSFT,GOOGL,AMZN,META), 10 qtrs CY2017Q1->CY2026Q1
+computed: {'capex_to_ocf': 65.0, 'hyperscaler_capex': 'raising', 'hyperscaler_capex_accel': 'accelerating'}
 
 detail:
 {
   "per_company": {
     "MSFT": {
-      "capex_pts": 19,
-      "ocf_pts": 17
+      "capex_pts": 54,
+      "ocf_pts": 44
     },
     "GOOGL": {
-      "capex_pts": 13,
-      "ocf_pts": 13
+      "capex_pts": 24,
+      "ocf_pts": 12
     },
     "AMZN": {
-      "capex_pts": 10,
-      "ocf_pts": 19
+      "capex_pts": 54,
+      "ocf_pts": 55
     },
     "META": {
-      "capex_pts": 16,
-      "ocf_pts": 16
+      "capex_pts": 15,
+      "ocf_pts": 15
     }
   },
   "quarterly_per_company": {
@@ -32,7 +32,7 @@ detail:
       "ocf_pts": 12
     },
     "AMZN": {
-      "capex_pts": 27,
+      "capex_pts": 54,
       "ocf_pts": 55
     },
     "META": {
@@ -40,39 +40,46 @@ detail:
       "ocf_pts": 15
     }
   },
-  "annual_per_company": {
-    "MSFT": {
-      "capex_pts": 19,
-      "ocf_pts": 17
-    },
-    "GOOGL": {
-      "capex_pts": 13,
-      "ocf_pts": 13
-    },
-    "AMZN": {
-      "capex_pts": 10,
-      "ocf_pts": 19
-    },
-    "META": {
-      "capex_pts": 16,
-      "ocf_pts": 16
-    }
-  },
-  "mode": "annual",
+  "mode": "quarterly",
   "keys": [
-    "2013",
-    "2016"
+    "CY2017Q1",
+    "CY2018Q1",
+    "CY2019Q1",
+    "CY2020Q1",
+    "CY2021Q1",
+    "CY2022Q1",
+    "CY2023Q1",
+    "CY2024Q1",
+    "CY2025Q1",
+    "CY2026Q1"
   ],
   "capex_series": [
-    16421000000,
-    29783000000
+    7335000000,
+    16143000000,
+    14330000000,
+    20125000000,
+    27416000000,
+    35518000000,
+    33926000000,
+    44289000000,
+    71902000000,
+    129750000000
   ],
   "ocf_series": [
-    57189000000,
-    102672000000
+    23647000000,
+    29862000000,
+    36674000000,
+    43020000000,
+    57923000000,
+    61778000000,
+    66736000000,
+    99000000000,
+    114235000000,
+    150727000000
   ],
   "out": {
-    "capex_to_ocf": 29.0,
-    "hyperscaler_capex": "raising"
+    "capex_to_ocf": 65.0,
+    "hyperscaler_capex": "raising",
+    "hyperscaler_capex_accel": "accelerating"
   }
 }
