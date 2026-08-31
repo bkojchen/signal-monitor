@@ -1,0 +1,78 @@
+2026-08-31T15:42:33.153083+00:00
+EDGAR annual: 4/4 (MSFT,GOOGL,AMZN,META), FY 2013->2016
+computed: {'capex_to_ocf': 29.0, 'hyperscaler_capex': 'raising'}
+
+detail:
+{
+  "per_company": {
+    "MSFT": {
+      "capex_pts": 19,
+      "ocf_pts": 17
+    },
+    "GOOGL": {
+      "capex_pts": 13,
+      "ocf_pts": 13
+    },
+    "AMZN": {
+      "capex_pts": 10,
+      "ocf_pts": 19
+    },
+    "META": {
+      "capex_pts": 16,
+      "ocf_pts": 16
+    }
+  },
+  "quarterly_per_company": {
+    "MSFT": {
+      "capex_pts": 54,
+      "ocf_pts": 44
+    },
+    "GOOGL": {
+      "capex_pts": 24,
+      "ocf_pts": 12
+    },
+    "AMZN": {
+      "capex_pts": 27,
+      "ocf_pts": 55
+    },
+    "META": {
+      "capex_pts": 15,
+      "ocf_pts": 15
+    }
+  },
+  "annual_per_company": {
+    "MSFT": {
+      "capex_pts": 19,
+      "ocf_pts": 17
+    },
+    "GOOGL": {
+      "capex_pts": 13,
+      "ocf_pts": 13
+    },
+    "AMZN": {
+      "capex_pts": 10,
+      "ocf_pts": 19
+    },
+    "META": {
+      "capex_pts": 16,
+      "ocf_pts": 16
+    }
+  },
+  "mode": "annual",
+  "keys": [
+    "2013",
+    "2016"
+  ],
+  "capex_series": [
+    16421000000,
+    29783000000
+  ],
+  "ocf_series": [
+    57189000000,
+    102672000000
+  ],
+  "out": {
+    "capex_to_ocf": 29.0,
+    "hyperscaler_capex": "raising"
+  }
+}
