@@ -93,6 +93,22 @@ def append_history(records: Dict[str, float]) -> None:
         w.writerows(rows)
 
 
+def _replace_series(signal: str, series: dict) -> None:
+    """Replace all history rows for `signal` with a dated {date: value} curve."""
+    os.makedirs(os.path.dirname(HISTORY), exist_ok=True)
+    rows = []
+    if os.path.exists(HISTORY):
+        with open(HISTORY) as f:
+            rows = [r for r in csv.DictReader(f) if r["signal"] != signal]
+    for date, val in series.items():
+        rows.append({"date": date, "signal": signal, "value": val})
+    rows.sort(key=lambda r: (r["signal"], r["date"]))
+    with open(HISTORY, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["date", "signal", "value"])
+        w.writeheader()
+        w.writerows(rows)
+
+
 def read_history() -> Dict[str, List[tuple]]:
     """Return {signal: [(date, value), ... ascending]}."""
     out: Dict[str, List[tuple]] = {}
@@ -154,8 +170,12 @@ def run_extract(config: dict, manual_path: str) -> Dict[str, object]:
                 if sig in computed:
                     v = computed[sig]
                     current[sig] = v
-                    if spec.get("direction") != "categorical" and isinstance(v, (int, float)):
+                    # capex_growth_ttm is stored as a full quarterly curve below, not a single point
+                    if sig != "capex_growth_ttm" and spec.get("direction") != "categorical" \
+                            and isinstance(v, (int, float)):
                         numeric[sig] = float(v)
+            if getattr(_edgar, "LAST_CURVE", None):
+                _replace_series("capex_growth_ttm", _edgar.LAST_CURVE)
         except Exception as e:
             print(f"  ! edgar: {e}")
             _write_debug(f"exception: {e}", {})
