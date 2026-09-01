@@ -42,7 +42,11 @@ def main():
         current = {**{k: v for k, v in current.items() if isinstance(v, dict)}}
         # EDGAR signals aren't fetched in mock mode; supply sample values so the preview is complete
         current.setdefault("hyperscaler_capex", "raising")
-        current.setdefault("hyperscaler_capex_accel", "decelerating")
+        current.setdefault("hyperscaler_capex_accel", "contracting")
+        if isinstance(current.get("marginal_loan_quality"), dict):
+            current["marginal_loan_quality"]["review"] = {
+                "count": 3, "headline": "CoreWeave prices new DDTL at junk spread",
+                "url": "https://news.google.com"}
         print("• mock mode: using sample history + manual file")
     else:
         if "PUT_YOUR_FREE_FRED_KEY" in config.get("fred_api_key", ""):

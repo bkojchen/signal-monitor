@@ -72,6 +72,8 @@ def resolve_signal(sig: str, spec: dict, current, history: Dict[str, List[tuple]
     # ---- categorical (manual) ----
     if spec.get("direction") == "categorical":
         val = current.get("value") if isinstance(current, dict) else current
+        if isinstance(current, dict) and current.get("review"):
+            out["review"] = current["review"]
         if val in (None, "", "None", "none") and not spec.get("categorical", {}).get("none"):
             out["status"] = "stale"
             out["value_str"] = "no data"

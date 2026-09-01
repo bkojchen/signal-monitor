@@ -157,6 +157,22 @@ def run_extract(config: dict, manual_path: str) -> Dict[str, object]:
         if spec.get("direction") != "categorical" and isinstance(val, (int, float)):
             numeric[sig] = float(val)
 
+    # ---- news watcher: flag event-driven signals that have fresh headlines ----
+    news_queries = {s: spec["news_query"] for s, spec in config.get("manual_signals", {}).items()
+                    if spec.get("news_query")}
+    if news_queries:
+        try:
+            import news as _news
+            days = max((spec.get("news_days", 21) for spec in config.get("manual_signals", {}).values()
+                        if spec.get("news_query")), default=21)
+            flags = _news.check(news_queries, days=days)
+            for sig, info in flags.items():
+                if isinstance(current.get(sig), dict):
+                    current[sig]["review"] = info
+            print(f"  news: {len(flags)} signal(s) flagged for review")
+        except Exception as e:
+            print(f"  ! news: {e}")
+
     # ---- EDGAR-computed capex signals (one fetch covers several signals) ----
     edgar_sigs = {s: spec for s, spec in config.get("signals", {}).items()
                   if spec.get("source") == "edgar"}

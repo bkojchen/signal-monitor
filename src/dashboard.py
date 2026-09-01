@@ -37,6 +37,11 @@ def _card(s: dict) -> str:
     else:
         upd = f' · {s["updated"]}' if s.get("updated") else ""
         badge = f'<span class="src src-manual">✎ manual{upd}</span>'
+    review = ""
+    if s.get("review"):
+        r = s["review"]
+        review = (f'<a class="review" href="{r.get("url","#")}" target="_blank" '
+                  f'title="{r.get("headline","")}">🔔 {r.get("count",0)} new · review</a>')
     return f"""
     <article class="card" style="--c:{col}">
       <div class="card-top">
@@ -46,6 +51,7 @@ def _card(s: dict) -> str:
       <h3>{s['label']}{stale}</h3>
       <div class="value">{s['value_str']} {change}</div>
       <div class="spark">{_spark(s.get('sparkline', []), s['status'])}</div>
+      {review}
       <div class="card-foot">
         <span class="trigger">{s['trigger']}</span>
         {badge}
@@ -151,6 +157,10 @@ def render(signals: List[dict], overall: dict, mock: bool = False,
     white-space:nowrap; }}
   .src-auto {{ color:#7fa8c9; border:1px solid #2c3e50; background:#141b26; }}
   .src-manual {{ color:#cf9f52; border:1px solid #443a24; background:#1c1810; }}
+  .review {{ display:inline-block; margin:2px 0 8px; font-size:11px; color:#e0b15a;
+    background:#241c0e; border:1px solid #4a3c1c; border-radius:6px; padding:3px 8px;
+    text-decoration:none; }}
+  .review:hover {{ border-color:#cf9f52; }}
   .foot {{ color:var(--muted); font-size:12px; margin-top:34px; border-top:1px solid var(--line);
     padding-top:14px; }}
   .foot-warn {{ color:#cf9f52; }}
