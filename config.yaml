@@ -77,13 +77,22 @@ signals:
     note: "1st derivative: aggregate MSFT+GOOGL+AMZN+META quarterly capex, YoY. Computed from filings."
 
   hyperscaler_capex_accel:
-    label: "Hyperscaler capex — 2nd derivative"
+    label: "Hyperscaler capex acceleration"
     category: leading
     source: edgar
     direction: categorical
     cascade: true
-    categorical: { accelerating: green, steady: green, decelerating: amber, contracting: red }
-    note: "The article's central number: is the capex GROWTH RATE itself rising or rolling over. Computed from filings."
+    categorical: { accelerating: green, stabilizing: amber, contracting: red }
+    note: "Change in the TTM capex-growth rate, quarter over quarter. Contracting = the roll-over the thesis watches for. Computed from filings."
+
+  capex_growth_ttm:
+    label: "Hyperscaler capex growth (TTM curve)"
+    category: leading
+    source: edgar
+    unit: "%"
+    direction: lower_is_worse
+    absolute: { amber_below: 15, red_below: 0 }
+    note: "Trailing-12-month capex vs a year ago, updated each quarter (deseasonalized). Its sparkline is the acceleration curve — watch it bend before it crosses zero."
 
   capex_to_ocf:
     label: "Aggregate capex / operating cash flow"
