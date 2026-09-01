@@ -205,7 +205,7 @@ date,signal,value
 2026-08-27,ai_basket_drawdown,-8.54
 2026-08-28,ai_basket_drawdown,-8.44
 2026-08-31,ai_basket_drawdown,-13.16
-2026-09-01,ai_basket_drawdown,-12.85
+2026-09-01,ai_basket_drawdown,-14.27
 2016-09-30,capex_growth_ttm,17.0
 2016-12-31,capex_growth_ttm,34.0
 2017-03-31,capex_growth_ttm,27.8
@@ -459,7 +459,7 @@ date,signal,value
 2026-08-27,equity_vol,14.51
 2026-08-28,equity_vol,14.43
 2026-08-31,equity_vol,14.43
-2026-09-01,equity_vol,14.43
+2026-09-01,equity_vol,14.92
 2026-08-29,gpu_rent_h100,2.35
 2026-08-31,gpu_rent_h100,2.35
 2026-09-01,gpu_rent_h100,2.35
