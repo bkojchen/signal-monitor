@@ -123,6 +123,8 @@ manual_signals:
     cascade: true
     categorical: { investment_grade: green, crossover: amber, junk: red, stalled: red }
     source_hint: "Ratings/spreads on the newest neocloud DDTL or bond (CoreWeave, Nebius, Crusoe, Lambda)."
+    news_query: 'CoreWeave OR Nebius OR Crusoe OR Lambda debt OR bond OR downgrade OR rating'
+    news_days: 21
 
   depreciation_disclosure:
     label: "Server-life / impairment disclosures"
@@ -130,6 +132,8 @@ manual_signals:
     direction: categorical
     categorical: { extending: green, stable: green, shortening: amber, charge_taken: red }
     source_hint: "10-Q footnotes & earnings calls: is anyone SHORTENING useful life or taking a charge?"
+    news_query: 'hyperscaler server "useful life" OR impairment depreciation AI chips'
+    news_days: 21
 
   ai_lab_rounds:
     label: "AI-lab funding rounds"
@@ -137,6 +141,8 @@ manual_signals:
     direction: categorical
     categorical: { up_round: green, flat: amber, delayed: amber, down_round: red }
     source_hint: "OpenAI / Anthropic / xAI latest raise: up, flat, delayed, or down."
+    news_query: 'OpenAI OR Anthropic OR xAI funding round valuation'
+    news_days: 21
 
   neocloud_events:
     label: "Neocloud covenant / default events"
@@ -145,6 +151,8 @@ manual_signals:
     cascade: true
     categorical: { none: green, stress: amber, covenant_breach: red, default: red }
     source_hint: "Filings/credit news: any coverage-covenant breach or forced GPU sale?"
+    news_query: 'neocloud OR CoreWeave OR Crusoe default OR covenant OR "forced sale" OR bankruptcy GPU'
+    news_days: 21
 
   # ===== Added from "The Second Derivative" — watch the ACCELERATION, not the level =====
   capex_cut_rewarded:
@@ -155,6 +163,8 @@ manual_signals:
     stale_days: 100
     categorical: { none: green, cut_announced: amber, cut_rewarded: red }
     source_hint: "Has a hyperscaler announced a capex CUT and seen its stock RISE on it? That inversion ends the arms race. Watch Meta/Zuckerberg first."
+    news_query: 'Microsoft OR Meta OR Google OR Amazon capex cut OR reduce data center spending'
+    news_days: 21
 
   # ===== Added from "The Teaser Period" — the funding treadmill & the reset wall =====
   openai_step_up:
@@ -166,6 +176,8 @@ manual_signals:
     stale_days: 180                # only moves on a new raise
     absolute: { amber_below: 1.5, red_below: 1.3 }
     source_hint: "Each new OpenAI raise ÷ the prior valuation. The treadmill: prior steps ran 1.7–1.9×; the implied IPO step is ~1.23×. Nearing 1.0× = the refinance is failing."
+    news_query: 'OpenAI funding round valuation billion'
+    news_days: 21
 
   openai_ipo_status:
     label: "OpenAI terminal refinance (IPO)"
@@ -175,6 +187,8 @@ manual_signals:
     stale_days: 120
     categorical: { on_track: green, delayed: amber, pulled: red, priced_below: red }
     source_hint: "The refinance of last resort. On track, delayed, pulled, or pricing below the last private mark? The delay is itself the signal."
+    news_query: 'OpenAI IPO'
+    news_days: 21
 
   contract_renegotiation:
     label: "Take-or-pay contract renegotiation"
@@ -184,6 +198,8 @@ manual_signals:
     stale_days: 90
     categorical: { none: green, rumored: amber, confirmed: red }
     source_hint: "The reset-wall trigger. Any compute take-or-pay deal deferred/renegotiated ('capacity rephasing', 'efficiency-linked pricing')? The first amendment re-rates the whole $2.3T backlog."
+    news_query: 'AI compute OR data center contract renegotiate OR "take-or-pay" OR "capacity rephasing"'
+    news_days: 21
 
   index_concentration:
     label: "S&P 500 top-10 weight"
