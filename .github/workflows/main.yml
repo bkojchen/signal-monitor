@@ -2,8 +2,13 @@ name: Update dashboard
 
 on:
   schedule:
-    - cron: "17 6 * * 1-5"     # ~08:17 Madrid (summer) — odd minute dodges congested slots
-    - cron: "23 8 * * 1-5"     # mid-morning backup in case the first is skipped
+    - cron: "17 6 * * *"
+    - cron: "17 7 * * *"
+    - cron: "17 8 * * *"
+    - cron: "17 9 * * *"
+    - cron: "17 10 * * *"
+    - cron: "17 11 * * *"
+    - cron: "17 12 * * *"
   workflow_dispatch:
   push:
     paths:
