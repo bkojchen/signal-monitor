@@ -1,4 +1,4 @@
-2026-09-14T18:04:53.674332+00:00
+2026-09-15T11:45:29.143328+00:00
 EDGAR quarterly: 4/4 (MSFT,GOOGL,AMZN,META), 39 curve pts, latest 2026Q2 growth +75.3% accel accelerating
 computed: {'capex_to_ocf': 77.3, 'capex_growth_ttm': 75.3, 'hyperscaler_capex': 'raising', 'hyperscaler_capex_accel': 'accelerating'}
 
