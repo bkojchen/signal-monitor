@@ -261,7 +261,7 @@ date,signal,value
 2026-10-24,ai_basket_drawdown,-18.2
 2026-10-25,ai_basket_drawdown,-18.2
 2026-10-26,ai_basket_drawdown,-16.93
-2026-10-27,ai_basket_drawdown,-17.2
+2026-10-27,ai_basket_drawdown,-16.1
 2016-09-30,capex_growth_ttm,17.0
 2016-12-31,capex_growth_ttm,34.0
 2017-03-31,capex_growth_ttm,27.8
@@ -959,7 +959,7 @@ date,signal,value
 2026-10-24,hy_spread,3.4
 2026-10-25,hy_spread,3.4
 2026-10-26,hy_spread,3.38
-2026-10-27,hy_spread,3.38
+2026-10-27,hy_spread,3.3
 2025-11-04,ig_spread,0.83
 2025-11-05,ig_spread,0.81
 2025-11-06,ig_spread,0.82
@@ -1232,7 +1232,7 @@ date,signal,value
 2026-10-24,ig_spread,0.89
 2026-10-25,ig_spread,0.89
 2026-10-26,ig_spread,0.91
-2026-10-27,ig_spread,0.91
+2026-10-27,ig_spread,0.9
 2026-08-31,index_concentration,40.0
 2026-09-01,index_concentration,40.0
 2026-09-02,index_concentration,40.0
