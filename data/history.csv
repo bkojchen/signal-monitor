@@ -261,6 +261,7 @@ date,signal,value
 2026-10-24,ai_basket_drawdown,-18.2
 2026-10-25,ai_basket_drawdown,-18.2
 2026-10-26,ai_basket_drawdown,-16.93
+2026-10-27,ai_basket_drawdown,-17.2
 2016-09-30,capex_growth_ttm,17.0
 2016-12-31,capex_growth_ttm,34.0
 2017-03-31,capex_growth_ttm,27.8
@@ -357,6 +358,7 @@ date,signal,value
 2026-10-24,capex_to_ocf,77.3
 2026-10-25,capex_to_ocf,77.3
 2026-10-26,capex_to_ocf,77.3
+2026-10-27,capex_to_ocf,77.3
 2025-11-04,equity_vol,19.0
 2025-11-05,equity_vol,18.01
 2025-11-06,equity_vol,19.5
@@ -625,6 +627,7 @@ date,signal,value
 2026-10-24,equity_vol,19.03
 2026-10-25,equity_vol,19.03
 2026-10-26,equity_vol,19.45
+2026-10-27,equity_vol,19.45
 2026-08-29,gpu_rent_h100,2.35
 2026-08-31,gpu_rent_h100,2.35
 2026-09-01,gpu_rent_h100,2.35
@@ -683,6 +686,7 @@ date,signal,value
 2026-10-24,gpu_rent_h100,2.35
 2026-10-25,gpu_rent_h100,2.35
 2026-10-26,gpu_rent_h100,2.35
+2026-10-27,gpu_rent_h100,2.35
 2025-11-04,hy_spread,3.13
 2025-11-05,hy_spread,3.05
 2025-11-06,hy_spread,3.13
@@ -955,6 +959,7 @@ date,signal,value
 2026-10-24,hy_spread,3.4
 2026-10-25,hy_spread,3.4
 2026-10-26,hy_spread,3.38
+2026-10-27,hy_spread,3.38
 2025-11-04,ig_spread,0.83
 2025-11-05,ig_spread,0.81
 2025-11-06,ig_spread,0.82
@@ -1227,6 +1232,7 @@ date,signal,value
 2026-10-24,ig_spread,0.89
 2026-10-25,ig_spread,0.89
 2026-10-26,ig_spread,0.91
+2026-10-27,ig_spread,0.91
 2026-08-31,index_concentration,40.0
 2026-09-01,index_concentration,40.0
 2026-09-02,index_concentration,40.0
@@ -1284,6 +1290,7 @@ date,signal,value
 2026-10-24,index_concentration,40.0
 2026-10-25,index_concentration,40.0
 2026-10-26,index_concentration,40.0
+2026-10-27,index_concentration,40.0
 2026-08-31,openai_step_up,1.23
 2026-09-01,openai_step_up,1.23
 2026-09-02,openai_step_up,1.23
@@ -1341,6 +1348,7 @@ date,signal,value
 2026-10-24,openai_step_up,1.23
 2026-10-25,openai_step_up,1.23
 2026-10-26,openai_step_up,1.23
+2026-10-27,openai_step_up,1.23
 2025-11-04,yield_curve,0.52
 2025-11-05,yield_curve,0.54
 2025-11-06,yield_curve,0.54
@@ -1603,3 +1611,4 @@ date,signal,value
 2026-10-24,yield_curve,0.31
 2026-10-25,yield_curve,0.31
 2026-10-26,yield_curve,0.31
+2026-10-27,yield_curve,0.32
