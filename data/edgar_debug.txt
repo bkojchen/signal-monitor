@@ -1,6 +1,6 @@
-2026-10-29T18:27:23.036682+00:00
-EDGAR quarterly: 4/4 (MSFT,GOOGL,AMZN,META), 39 curve pts, latest 2026Q2 growth +75.3% accel accelerating
-computed: {'capex_to_ocf': 77.3, 'capex_growth_ttm': 75.3, 'hyperscaler_capex': 'raising', 'hyperscaler_capex_accel': 'accelerating'}
+2026-10-30T12:57:02.854685+00:00
+EDGAR quarterly: 4/4 (MSFT,GOOGL,AMZN,META), 40 curve pts, latest 2026Q3 growth +86.6% accel accelerating
+computed: {'capex_to_ocf': 90.9, 'capex_growth_ttm': 86.6, 'hyperscaler_capex': 'raising', 'hyperscaler_capex_accel': 'accelerating'}
 
 detail:
 {
@@ -18,10 +18,6 @@ detail:
     "META"
   ],
   "curve": [
-    [
-      "2024Q1",
-      5.4
-    ],
     [
       "2024Q2",
       21.3
@@ -57,8 +53,12 @@ detail:
     [
       "2026Q2",
       75.3
+    ],
+    [
+      "2026Q3",
+      86.6
     ]
   ],
-  "n_quarters": 46,
-  "latest_quarter": "2026Q2"
+  "n_quarters": 47,
+  "latest_quarter": "2026Q3"
 }
